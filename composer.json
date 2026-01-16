@@ -1,0 +1,17 @@
+{
+    "name": "meski/modernisation-dune-application-de-job-dating",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Meski Abdelilah",
+            "email": "meskiabdelilah10@gmail.com"
+        }
+    ],
+    "require": {
+        "twig/twig": "^3.22"
+    }
+}
