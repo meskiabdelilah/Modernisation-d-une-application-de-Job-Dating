@@ -1,24 +1,49 @@
 <?php
 
 namespace App\core;
+
 class Session {
 
-    public function __construct () 
+    private static $instance = null;
+
+    private function __construct () 
     {
-    // Démarrage de la session
+        // Démarrage de la session
         if(session_status() === PHP_SESSION_NONE)
         {
-        ini_set('session.gc_maxlifetime', 1800);
-        session_set_cookie_params(1800);
+            ini_set('session.gc_maxlifetime', 1800);
+            
+            // cookies
+            session_set_cookie_params([
+                'lifetime' => 1800,
+                'path' => '/',
+                'domain' => '',
+                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+                'httponly' => true,
+                'samesite' => 'Strict'
+            ]);
 
-        session_start();
+            session_start();
         }
 
         if (!isset($_SESSION['initiated'])) {
-        session_regenerate_id(true);
-        $_SESSION['initiated'] = true;
+            session_regenerate_id(true);
+            $_SESSION['initiated'] = true;
         }
     }
+
+        /**
+     * Récupère l'instance unique (Singleton)
+     */
+    public static function getInstance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
 
     // method for get a session value by key 
     public function get ($key, $default = null)
@@ -29,11 +54,18 @@ class Session {
     // method for set a session value by key
     public function set ($key, $value)
     {
-        $_session[$key] = $value;
+        $_SESSION[$key] = $value;
+    }
+        /**
+     * Vérifie si une clé existe
+     */
+    public function has(string $key): bool
+    {
+        return isset($_SESSION[$key]);
     }
 
     // method for remove a session value by key
-    public function remove ($key)
+    public function delete ($key)
     {
         unset($_SESSION[$key]);
     }
@@ -42,6 +74,36 @@ class Session {
     public function destroy() 
     {
         session_destroy();
-        $_session = [];
+        $_SESSION = [];
+    }
+
+    /**
+     * Flash message (message temporaire)
+     */
+    public function flash(string $key, $value = null)
+    {
+        if ($value === null) {
+            $message = $this->get("flash_{$key}");
+            $this->delete("flash_{$key}");
+            return $message;
+        }
+
+        $this->set("flash_{$key}", $value);
+    }
+
+    /**
+     * Régénère l'ID de session (sécurité)
+     */
+    public function regenerate(): void
+    {
+        session_regenerate_id(true);
+    }
+
+    /**
+     * Récupère toutes les données de session
+     */
+    public function all(): array
+    {
+        return $_SESSION;
     }
 }
