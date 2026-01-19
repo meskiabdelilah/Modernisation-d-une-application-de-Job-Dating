@@ -93,14 +93,25 @@ class Router
         if (is_callable($action)) {
             return call_user_func_array($action, $routeParams);
         } else if (is_array($action)) {
-            return call_user_func_array([new $action[0], $action[1]], $routeParams);
+            $controllerClass = $action[0];
+            $method = $action[1];
+            
+            if (!class_exists($controllerClass) || !is_subclass_of($controllerClass, 'App\\core\\Controller')) {
+                throw new \Exception('Invalid controller class');
+            }
+            
+            $controller = new $controllerClass();
+            
+            if (!method_exists($controller, $method)) {
+                throw new \Exception('Method not found');
+            }
+            
+            return call_user_func_array([$controller, $method], $routeParams);
         }
     }
     private function abort(string $message, int $code = 404)
     {
-
         http_response_code($code);
-        echo $message;
-        exit();
+        throw new \Exception($message, $code);
     }
 }
