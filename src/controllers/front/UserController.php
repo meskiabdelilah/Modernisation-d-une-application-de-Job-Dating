@@ -13,4 +13,8 @@ class UserController extends Controller
             'product' => $product
         ]);
     }
+    public function test()
+    {
+        $this->twigView('auth/login');
+    }
 }
