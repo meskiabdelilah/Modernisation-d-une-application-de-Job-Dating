@@ -1,10 +1,4 @@
 <?php
-
-/**
- * Classe Database - Pattern Singleton
- * Gère la connexion à la base de données
- */
-
 namespace App\core;
 
 use Pdo;
@@ -30,7 +24,9 @@ class Database
 
             $this->connection = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
-            die("Erreur de connexion : " . $e->getMessage());
+            error_log("Database connection error: " . $e->getMessage());
+            
+            throw new \Exception("Database connection failed. Please try again later.");
         }
     }
 
@@ -45,6 +41,8 @@ class Database
      */
     public static function getInstance()
     {
+        require_once __DIR__ . '/../../config/config.php';
+
         if (self::$instance === null) {
             self::$instance = new self();
         }
@@ -76,5 +74,13 @@ class Database
     public function lastInsertId()
     {
         return $this->connection->lastInsertId();
+    }
+
+        /**
+     * Empêche la désérialisation
+     */
+    public function __wakeup()
+    {
+        throw new \Exception("Cannot unserialize singleton");
     }
 }
