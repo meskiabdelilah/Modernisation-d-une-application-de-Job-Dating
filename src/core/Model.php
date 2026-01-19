@@ -26,7 +26,6 @@ abstract class Model {
 
     // Insert a new record @param array $data Associative array of column => value
     public function create(array $data) {
-        // تنظيف أسماء الأعمدة
         $allowedColumns = $this->getAllowedColumns();
         $data = array_intersect_key($data, array_flip($allowedColumns));
         
